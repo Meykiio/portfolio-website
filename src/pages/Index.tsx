@@ -9,7 +9,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-glass backdrop-blur-glass border-b border-white/20">
+      <nav className="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-border/20">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="font-space font-bold text-xl">
             Sifeddine.xyz
@@ -60,7 +60,7 @@ const Index = () => {
       </main>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-border/20">
+      <footer className="py-12 px-6 border-t border-border/20 glass-effect">
         <div className="max-w-4xl mx-auto text-center">
           <p className="font-mono text-muted-foreground">
             Built with systems, not stress. © 2024 Sifeddine.xyz

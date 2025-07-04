@@ -2,7 +2,7 @@ const About = () => {
   return (
     <section className="py-20 px-6">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-gradient-glass backdrop-blur-glass border border-white/20 rounded-2xl p-8 md:p-12 shadow-glass">
+        <div className="glass-effect rounded-2xl p-8 md:p-12 shadow-glass">
           <h2 className="font-space text-3xl md:text-4xl font-bold mb-8 text-center">
             About Me
           </h2>

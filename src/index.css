@@ -8,27 +8,27 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Brutalist Base Colors */
-    --background: 0 0% 99.2%;
-    --foreground: 0 0% 6.5%;
+    /* Dark Brutalist Base Colors */
+    --background: 0 0% 6.5%;
+    --foreground: 0 0% 95%;
 
     /* Surface Colors */
-    --card: 0 0% 97%;
-    --card-foreground: 0 0% 6.5%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 99.2%;
-    --popover-foreground: 0 0% 6.5%;
+    --popover: 0 0% 6.5%;
+    --popover-foreground: 0 0% 95%;
 
     /* Brand Colors */
     --primary: 180 100% 50%; /* Electric Cyan */
     --primary-foreground: 0 0% 6.5%;
 
-    --secondary: 0 0% 94%;
-    --secondary-foreground: 0 0% 6.5%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 95%;
 
     /* Accent & Muted */
-    --muted: 0 0% 94%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 60%;
 
     --accent: 180 100% 50%; /* Electric Cyan */
     --accent-foreground: 0 0% 6.5%;
@@ -37,21 +37,21 @@ All colors MUST be HSL.
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 89%;
-    --input: 0 0% 89%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
     --ring: 180 100% 50%;
 
     --radius: 8px;
 
     /* Custom Design Tokens */
-    --brutalist-shadow: 0 4px 0 0 hsl(0 0% 6.5%);
-    --glass-bg: 0 0% 98% / 0.8;
-    --glass-border: 0 0% 89% / 0.2;
-    --glass-shadow: 0 8px 32px 0 hsl(0 0% 0% / 0.05);
+    --brutalist-shadow: 0 4px 0 0 hsl(0 0% 95%);
+    --glass-bg: 0 0% 8% / 0.8;
+    --glass-border: 0 0% 20% / 0.2;
+    --glass-shadow: 0 8px 32px 0 hsl(0 0% 0% / 0.3);
     
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(180 100% 50%), hsl(180 100% 45%));
-    --gradient-glass: linear-gradient(135deg, hsl(0 0% 98% / 0.8), hsl(0 0% 95% / 0.6));
+    --gradient-glass: linear-gradient(135deg, hsl(0 0% 8% / 0.8), hsl(0 0% 12% / 0.6));
     
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

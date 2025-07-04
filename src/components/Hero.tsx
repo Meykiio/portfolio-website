@@ -1,26 +1,48 @@
 import { Button } from "@/components/ui/button";
 import heroBackground from "@/assets/hero-background.jpg";
+import MetaBalls from "./MetaBalls";
+import Silk from "./Silk";
+import TextScramble from "./TextScramble";
 
 const Hero = () => {
   return (
-    <section 
-      className="min-h-screen flex items-center justify-center px-6 py-20 relative overflow-hidden"
-      style={{
-        backgroundImage: `url(${heroBackground})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
-      }}
-    >
-      {/* Overlay for better text readability */}
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm"></div>
+    <section className="min-h-screen flex items-center justify-center px-6 py-20 relative overflow-hidden">
+      {/* Silk Background */}
+      <div className="absolute inset-0 opacity-30">
+        <Silk
+          speed={3}
+          scale={2}
+          color="#00FFFF"
+          noiseIntensity={0.8}
+          rotation={0.2}
+        />
+      </div>
+      
+      {/* MetaBalls Interactive Layer */}
+      <div className="absolute inset-0 opacity-60">
+        <MetaBalls
+          color="#00FFFF"
+          cursorBallColor="#FFFFFF"
+          cursorBallSize={3}
+          ballCount={12}
+          animationSize={40}
+          enableMouseInteraction={true}
+          enableTransparency={true}
+          hoverSmoothness={0.08}
+          clumpFactor={0.8}
+          speed={0.2}
+        />
+      </div>
+      
+      {/* Dark overlay for text readability */}
+      <div className="absolute inset-0 bg-background/20"></div>
       
       <div className="max-w-4xl mx-auto text-center space-y-8 relative z-10">
         <div className="space-y-6 animate-slide-up">
           <h1 className="font-space text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-tight">
             Hey, I'm{" "}
             <span className="text-primary animate-float inline-block">
-              Sifeddine
+              <TextScramble text="Sifeddine" />
             </span>
             .
           </h1>

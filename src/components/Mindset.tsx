@@ -23,7 +23,7 @@ const Mindset = () => {
           {principles.map((principle, index) => (
             <div
               key={index}
-              className="bg-gradient-glass backdrop-blur-glass border border-white/20 rounded-lg p-6 shadow-glass hover:shadow-brutalist transition-all duration-300 hover:translate-x-1"
+              className="glass-effect rounded-lg p-6 shadow-glass hover:shadow-brutalist transition-all duration-300 hover:translate-x-1"
             >
               <p className="font-mono text-lg leading-relaxed">
                 {principle}
