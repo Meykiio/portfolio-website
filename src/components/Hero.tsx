@@ -1,22 +1,12 @@
 import { Button } from "@/components/ui/button";
 import heroBackground from "@/assets/hero-background.jpg";
 import MetaBalls from "./MetaBalls";
-import Silk from "./Silk";
+
 import TextScramble from "./TextScramble";
 
 const Hero = () => {
   return (
     <section className="min-h-screen flex items-center justify-center px-6 py-20 relative overflow-hidden">
-      {/* Silk Background */}
-      <div className="absolute inset-0 opacity-30">
-        <Silk
-          speed={3}
-          scale={2}
-          color="#00FFFF"
-          noiseIntensity={0.8}
-          rotation={0.2}
-        />
-      </div>
       
       {/* MetaBalls Interactive Layer */}
       <div className="absolute inset-0 opacity-60">

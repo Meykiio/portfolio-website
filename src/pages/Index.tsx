@@ -4,10 +4,27 @@ import Projects from "@/components/Projects";
 import Lab from "@/components/Lab";
 import Mindset from "@/components/Mindset";
 import Contact from "@/components/Contact";
+import Silk from "@/components/Silk";
+import AIAssistant from "@/components/AIAssistant";
+import FloatingElements from "@/components/FloatingElements";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground relative">
+      {/* Global Silk Background */}
+      <div className="fixed inset-0 opacity-20 pointer-events-none">
+        <Silk
+          speed={5}
+          scale={1}
+          color="#7B7481"
+          noiseIntensity={1.5}
+          rotation={0}
+        />
+      </div>
+      
+      {/* Floating Elements */}
+      <FloatingElements />
+      
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-border/20">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -34,8 +51,11 @@ const Index = () => {
         </div>
       </nav>
 
+      {/* AI Assistant */}
+      <AIAssistant />
+
       {/* Main Content */}
-      <main>
+      <main className="relative z-10">
         <Hero />
         
         <div id="about">

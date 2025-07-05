@@ -1,3 +1,5 @@
+import InteractiveCard from "./InteractiveCard";
+
 const Projects = () => {
   const projects = [
     {
@@ -26,9 +28,10 @@ const Projects = () => {
         
         <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
           {projects.map((project, index) => (
-            <div
+            <InteractiveCard
               key={project.name}
-              className="group relative bg-gradient-glass backdrop-blur-glass border border-white/20 rounded-2xl p-8 shadow-glass hover:shadow-brutalist transition-all duration-300 hover:-translate-y-2"
+              className="group bg-gradient-glass backdrop-blur-glass border border-white/20 rounded-2xl p-8 shadow-glass hover:shadow-brutalist transition-all duration-300 hover:-translate-y-2"
+              glowColor="primary"
             >
               <div className="absolute top-4 right-4">
                 <span className="inline-block bg-primary/10 text-primary text-xs font-mono px-3 py-1 rounded-full">
@@ -48,7 +51,7 @@ const Projects = () => {
                 <span>→</span>
                 <span>Explore project</span>
               </div>
-            </div>
+            </InteractiveCard>
           ))}
         </div>
       </div>
