@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import heroBackground from "@/assets/hero-background.jpg";
 import MetaBalls from "./MetaBalls";
@@ -5,6 +6,13 @@ import MetaBalls from "./MetaBalls";
 import TextScramble from "./TextScramble";
 
 const Hero = () => {
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <section className="min-h-screen flex items-center justify-center px-6 py-20 relative overflow-hidden">
       
@@ -59,13 +67,28 @@ const Hero = () => {
         </div>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8 animate-scale-in">
-          <Button variant="cta" size="xl" className="font-space">
+          <Button 
+            variant="cta" 
+            size="xl" 
+            className="font-space"
+            onClick={() => scrollToSection('projects')}
+          >
             See What I Build
           </Button>
-          <Button variant="glass" size="xl" className="font-space">
+          <Button 
+            variant="glass" 
+            size="xl" 
+            className="font-space"
+            onClick={() => scrollToSection('mindset')}
+          >
             Read My Mindset
           </Button>
-          <Button variant="brutalist" size="xl" className="font-space">
+          <Button 
+            variant="brutalist" 
+            size="xl" 
+            className="font-space"
+            onClick={() => scrollToSection('contact')}
+          >
             Pitch Me Something Weird
           </Button>
         </div>
