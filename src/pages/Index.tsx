@@ -47,6 +47,9 @@ const Index = () => {
             <a href="#contact" className="hover:text-primary transition-colors duration-200">
               Contact
             </a>
+            <a href="/admin" className="hover:text-primary transition-colors duration-200">
+              Admin
+            </a>
           </div>
         </div>
       </nav>
