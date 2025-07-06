@@ -169,4 +169,11 @@ All colors MUST be HSL.
       transform: translateY(-15px) translateX(3px) rotate(0.5deg);
     }
   }
+
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    .glass-effect {
+      backdrop-filter: blur(8px);
+    }
+  }
 }

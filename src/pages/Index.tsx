@@ -27,11 +27,11 @@ const Index = () => {
       
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-border/20">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="font-space font-bold text-xl">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-3 md:py-4 flex justify-between items-center">
+          <div className="font-space font-bold text-lg md:text-xl">
             Sifeddine.xyz
           </div>
-          <div className="hidden md:flex gap-6 font-mono text-sm">
+          <div className="hidden md:flex gap-4 lg:gap-6 font-mono text-sm">
             <a href="#about" className="hover:text-primary transition-colors duration-200">
               About
             </a>
@@ -83,16 +83,17 @@ const Index = () => {
       </main>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-border/20 glass-effect">
+      <footer className="py-8 md:py-12 px-4 md:px-6 border-t border-border/20 glass-effect">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="font-mono text-muted-foreground">
+          <p className="font-mono text-sm md:text-base text-muted-foreground">
             Built with systems, not stress. © 2024 Sifeddine.xyz
           </p>
-          <div className="mt-4 flex justify-center gap-4 text-sm">
+          <div className="mt-3 md:mt-4 flex flex-wrap justify-center gap-2 md:gap-4 text-xs md:text-sm">
             <span className="text-primary">●</span>
             <span className="text-muted-foreground">Algiers</span>
             <span className="text-primary">●</span>
-            <span className="text-muted-foreground">Building the future, one weird tool at a time</span>
+            <span className="text-muted-foreground hidden sm:inline">Building the future, one weird tool at a time</span>
+            <span className="text-muted-foreground sm:hidden">Building the future</span>
             <span className="text-primary">●</span>
           </div>
         </div>

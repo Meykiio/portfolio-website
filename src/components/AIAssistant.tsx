@@ -1,232 +1,191 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Minimize2, Maximize2 } from "lucide-react";
-import TextScramble from "./TextScramble";
+import { MessageCircle, X, Send, Bot, User } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   id: string;
-  text: string;
-  sender: 'user' | 'ai';
+  type: 'user' | 'ai';
+  content: string;
   timestamp: Date;
 }
 
 const AIAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "Hey! I'm Sifeddine's AI assistant. I can tell you about his projects, mindset, and work. What would you like to know?",
-      sender: 'ai',
+      type: 'ai',
+      content: "Hello! I'm Jarvis, Sifeddine's AI assistant. How can I help you today?",
       timestamp: new Date()
     }
   ]);
-  const [inputValue, setInputValue] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const simulateAIResponse = (userMessage: string): string => {
-    const responses = {
-      projects: "Sifeddine loves building tools that think and automate repetitive tasks. His projects focus on AI integration, automation systems, and creative tools that blend technology with intuition.",
-      mindset: "His mindset is all about 'building things that run without me' - not from laziness, but because time is worth more than repetition. He believes in systemizing the boring and turning broken things into useful tools.",
-      work: "He works alone a lot but is never really alone - AI assistants, side projects, and creative ideas are always helping out. Based in Algiers, he's focused on freedom - both financial and mental.",
-      tech: "He works with modern web technologies, AI integration, and automation systems. Always exploring the intersection of psychology, design, and technology.",
-      contact: "You can reach out through the contact section below, or just continue chatting here! I can help answer questions about his work and approach.",
-    };
-
-    const message = userMessage.toLowerCase();
-    if (message.includes('project')) return responses.projects;
-    if (message.includes('mindset') || message.includes('philosophy')) return responses.mindset;
-    if (message.includes('work') || message.includes('what') || message.includes('who')) return responses.work;
-    if (message.includes('tech') || message.includes('technology') || message.includes('build')) return responses.tech;
-    if (message.includes('contact') || message.includes('reach')) return responses.contact;
-    
-    return "That's an interesting question! Sifeddine is passionate about building systems that think and automate the mundane. He believes in creating tools that provide both financial and mental freedom. What specific aspect would you like to explore?";
-  };
+  const [inputMessage, setInputMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+    if (!inputMessage.trim() || isLoading || !user) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: inputValue,
-      sender: 'user',
+      type: 'user',
+      content: inputMessage,
       timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInputValue("");
-    setIsTyping(true);
+    const currentMessage = inputMessage;
+    setInputMessage("");
+    setIsLoading(true);
 
-    // Simulate AI thinking time
-    setTimeout(() => {
-      const aiResponse: Message = {
+    try {
+      const { data, error } = await supabase.functions.invoke('chat-with-jarvis', {
+        body: { message: currentMessage },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: simulateAIResponse(inputValue),
-        sender: 'ai',
+        type: 'ai',
+        content: data.response,
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, aiResponse]);
-      setIsTyping(false);
-    }, 1000 + Math.random() * 2000);
+      
+      setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Error calling Jarvis:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to get response from Jarvis. Please try again.",
+      });
+      
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'ai',
+        content: "I apologize, but I'm experiencing technical difficulties. Please try again in a moment.",
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const toggleChat = () => {
-    setIsOpen(!isOpen);
-    setIsMinimized(false);
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
-      {/* Enhanced Chat Window */}
-      {isOpen && !isMinimized && (
-        <Card className="mb-4 w-96 h-[500px] glass-effect animate-scale-in flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-border/20">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-              </div>
-              <div>
-                <div className="text-sm font-mono font-semibold">AI Assistant</div>
-                <div className="text-xs text-muted-foreground">Always here to help</div>
-              </div>
-            </div>
-            <div className="flex gap-1">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-6 w-6 p-0"
-                onClick={() => setIsMinimized(true)}
-              >
-                <Minimize2 className="h-3 w-3" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-6 w-6 p-0"
-                onClick={() => setIsOpen(false)}
-              >
-                ×
-              </Button>
-            </div>
-          </div>
+    <>
+      {/* Floating AI Button */}
+      <Button
+        onClick={() => setIsOpen(true)}
+        className={`fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 w-12 h-12 md:w-14 md:h-14 rounded-full shadow-lg glass-effect border-primary/20 hover:border-primary/40 transition-all duration-300 ${
+          isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}
+        size="icon"
+      >
+        <MessageCircle className="h-5 w-5 md:h-6 md:w-6" />
+      </Button>
 
-          {/* Messages Area */}
-          <ScrollArea className="flex-1 p-4">
-            <div className="space-y-4">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
+      {/* Chat Interface */}
+      {isOpen && (
+        <Card className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 w-[calc(100vw-2rem)] max-w-96 h-[70vh] md:h-[500px] glass-effect border-primary/20 shadow-xl">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-base md:text-lg font-semibold">Jarvis AI</CardTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsOpen(false)}
+              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </CardHeader>
+          
+          <CardContent className="flex flex-col h-[calc(70vh-4rem)] md:h-[420px] p-3 md:p-4">
+            {/* Messages Area */}
+            <ScrollArea className="flex-1 pr-2 mb-4">
+              <div className="space-y-3 md:space-y-4">
+                {messages.map((message) => (
                   <div
-                    className={`max-w-[80%] rounded-lg p-3 text-sm ${
-                      message.sender === 'user'
-                        ? 'bg-primary text-primary-foreground ml-4'
-                        : 'bg-muted mr-4'
+                    key={message.id}
+                    className={`flex items-start gap-2 ${
+                      message.type === 'user' ? 'flex-row-reverse' : ''
                     }`}
                   >
-                    {message.sender === 'ai' ? (
-                      <TextScramble text={message.text} speed={20} />
-                    ) : (
-                      message.text
-                    )}
-                    <div className={`text-xs mt-1 opacity-70 ${
-                      message.sender === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                    <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 ${
+                      message.type === 'user' 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-muted text-muted-foreground'
                     }`}>
-                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {message.type === 'user' ? <User className="h-3 w-3 md:h-4 md:w-4" /> : <Bot className="h-3 w-3 md:h-4 md:w-4" />}
+                    </div>
+                    <div className={`max-w-[75%] rounded-lg px-3 py-2 text-xs md:text-sm ${
+                      message.type === 'user'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-foreground'
+                    }`}>
+                      {message.content}
                     </div>
                   </div>
-                </div>
-              ))}
-              
-              {isTyping && (
-                <div className="flex justify-start">
-                  <div className="bg-muted rounded-lg p-3 text-sm mr-4">
-                    <div className="flex gap-1">
-                      <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                ))}
+                
+                {isLoading && (
+                  <div className="flex items-start gap-2">
+                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-muted flex items-center justify-center">
+                      <Bot className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                    </div>
+                    <div className="bg-muted rounded-lg px-3 py-2 text-xs md:text-sm">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-          </ScrollArea>
+                )}
+              </div>
+            </ScrollArea>
 
-          {/* Input Area */}
-          <div className="p-4 border-t border-border/20">
+            {/* Input Area */}
             <div className="flex gap-2">
               <Input
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Ask me anything about Sifeddine..."
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                className="flex-1 bg-background/50"
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask Jarvis anything..."
+                disabled={isLoading}
+                className="flex-1 text-xs md:text-sm"
               />
-              <Button 
+              <Button
                 onClick={handleSendMessage}
-                size="sm"
-                disabled={!inputValue.trim() || isTyping}
-                className="px-3"
+                disabled={!inputMessage.trim() || isLoading}
+                size="icon"
+                className="shrink-0 h-9 w-9 md:h-10 md:w-10"
               >
-                <Send className="h-4 w-4" />
+                <Send className="h-3 w-3 md:h-4 md:w-4" />
               </Button>
             </div>
-          </div>
+          </CardContent>
         </Card>
       )}
-
-      {/* Minimized Chat */}
-      {isOpen && isMinimized && (
-        <Card className="mb-4 p-3 w-64 glass-effect animate-scale-in cursor-pointer" onClick={() => setIsMinimized(false)}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center">
-                <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
-              </div>
-              <span className="text-sm font-mono">AI Assistant</span>
-            </div>
-            <Maximize2 className="h-3 w-3 text-muted-foreground" />
-          </div>
-        </Card>
-      )}
-
-      {/* Chat Bubble Button */}
-      <Button
-        onClick={toggleChat}
-        size="lg"
-        className="w-14 h-14 rounded-full bg-primary/10 hover:bg-primary/20 border border-primary/30 backdrop-blur-md relative overflow-hidden group"
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        
-        {isOpen ? (
-          <span className="text-primary text-xl relative z-10">×</span>
-        ) : (
-          <div className="relative z-10 flex flex-col items-center">
-            <div className="w-3 h-3 bg-primary rounded-full mb-1 animate-pulse"></div>
-            <div className="flex gap-1">
-              <div className="w-1 h-1 bg-primary/60 rounded-full animate-bounce"></div>
-              <div className="w-1 h-1 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-              <div className="w-1 h-1 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-            </div>
-          </div>
-        )}
-      </Button>
-    </div>
+    </>
   );
 };
 

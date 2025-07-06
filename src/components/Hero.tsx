@@ -1,73 +1,77 @@
 import { Button } from "@/components/ui/button";
-import heroBackground from "@/assets/hero-background.jpg";
-import MetaBalls from "./MetaBalls";
-
 import TextScramble from "./TextScramble";
 
 const Hero = () => {
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
-    <section className="min-h-screen flex items-center justify-center px-6 py-20 relative overflow-hidden">
-      
-      {/* MetaBalls Interactive Layer */}
-      <div className="absolute inset-0 opacity-60">
-        <MetaBalls
-          color="#00FFFF"
-          cursorBallColor="#FFFFFF"
-          cursorBallSize={3}
-          ballCount={12}
-          animationSize={40}
-          enableMouseInteraction={true}
-          enableTransparency={true}
-          hoverSmoothness={0.08}
-          clumpFactor={0.8}
-          speed={0.2}
-        />
-      </div>
-      
-      {/* Dark overlay for text readability */}
-      <div className="absolute inset-0 bg-background/20"></div>
-      
-      <div className="max-w-4xl mx-auto text-center space-y-8 relative z-10">
-        <div className="space-y-6 animate-slide-up">
-          <h1 className="font-space text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-tight">
-            Hey, I'm{" "}
-            <span className="text-primary animate-float inline-block">
-              <TextScramble text="Sifeddine" />
-            </span>
-            .
+    <section className="min-h-screen flex items-center justify-center px-4 md:px-6 py-20 relative">
+      {/* Main Content */}
+      <div className="max-w-4xl mx-auto text-center space-y-6 md:space-y-8 relative z-10">
+        {/* Name and Title */}
+        <div className="space-y-3 md:space-y-4">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-space font-bold text-foreground">
+            Sifeddine
           </h1>
-          
-          <div className="space-y-4 text-xl md:text-2xl lg:text-3xl font-medium leading-relaxed max-w-3xl mx-auto">
-            <p>I like building things that run without me.</p>
-            
-            <p className="text-muted-foreground">
-              Not in a lazy way — in a{" "}
-              <span className="text-foreground font-semibold">
-                "my time is worth more than repetition"
-              </span>{" "}
-              kind of way.
-            </p>
-            
-            <p>
-              If something feels boring, I try to systemize it. If something feels broken, I turn it into a tool. If it makes me curious, I stay with it until it turns into something weird or useful.
-            </p>
+          <div className="text-lg sm:text-xl md:text-2xl font-mono text-primary">
+            <TextScramble
+              text="Full-Stack Developer & AI Enthusiast"
+              className="inline-block"
+            />
           </div>
-          
-          <p className="text-lg md:text-xl text-muted-foreground font-mono">
-            Welcome to the space where all that lives.
-          </p>
         </div>
-        
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8 animate-scale-in">
-          <Button variant="cta" size="xl" className="font-space">
-            See What I Build
+
+        {/* Tagline */}
+        <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
+          Building systems, not stress. Creating elegant solutions for complex problems.
+        </p>
+
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center pt-4 md:pt-6 px-4">
+          <Button 
+            size="lg" 
+            className="font-mono text-base md:text-lg px-6 md:px-8 py-4 md:py-6"
+            onClick={() => scrollToSection('projects')}
+          >
+            View My Work
           </Button>
-          <Button variant="glass" size="xl" className="font-space">
-            Read My Mindset
+          <Button 
+            variant="outline" 
+            size="lg" 
+            className="font-mono text-base md:text-lg px-6 md:px-8 py-4 md:py-6 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+            onClick={() => scrollToSection('contact')}
+          >
+            Get In Touch
           </Button>
-          <Button variant="brutalist" size="xl" className="font-space">
-            Pitch Me Something Weird
-          </Button>
+        </div>
+
+        {/* Tech Stack Indicators */}
+        <div className="pt-8 md:pt-12">
+          <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4 font-mono">
+            TECH STACK
+          </p>
+          <div className="flex flex-wrap justify-center gap-2 md:gap-4 text-xs md:text-sm font-mono px-4">
+            <span className="px-2 md:px-3 py-1 border border-border rounded text-muted-foreground">
+              React
+            </span>
+            <span className="px-2 md:px-3 py-1 border border-border rounded text-muted-foreground">
+              Node.js
+            </span>
+            <span className="px-2 md:px-3 py-1 border border-border rounded text-muted-foreground">
+              Python
+            </span>
+            <span className="px-2 md:px-3 py-1 border border-border rounded text-muted-foreground">
+              AI/ML
+            </span>
+            <span className="px-2 md:px-3 py-1 border border-border rounded text-muted-foreground">
+              PostgreSQL
+            </span>
+          </div>
         </div>
       </div>
     </section>
