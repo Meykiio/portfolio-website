@@ -33,6 +33,72 @@ export type Database = {
         }
         Relationships: []
       }
+      blogs: {
+        Row: {
+          content: string
+          created_at: string
+          excerpt: string | null
+          id: string
+          image_url: string | null
+          published: boolean | null
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          image_url?: string | null
+          published?: boolean | null
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          image_url?: string | null
+          published?: boolean | null
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          status: string | null
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          status?: string | null
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          status?: string | null
+          subject?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -60,6 +126,48 @@ export type Database = {
           role?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          content: string | null
+          created_at: string
+          demo_url: string | null
+          description: string | null
+          featured: boolean | null
+          github_url: string | null
+          id: string
+          image_url: string | null
+          technologies: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          demo_url?: string | null
+          description?: string | null
+          featured?: boolean | null
+          github_url?: string | null
+          id?: string
+          image_url?: string | null
+          technologies?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          demo_url?: string | null
+          description?: string | null
+          featured?: boolean | null
+          github_url?: string | null
+          id?: string
+          image_url?: string | null
+          technologies?: string[] | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
