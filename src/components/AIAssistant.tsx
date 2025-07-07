@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,8 +28,43 @@ const AIAssistant = () => {
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string>("");
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Initialize session for chat history
+  useEffect(() => {
+    const initializeSession = () => {
+      // Use user ID if logged in, otherwise create a temporary session ID
+      const id = user?.id || `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      setSessionId(id);
+      
+      // Load chat history from localStorage for non-logged users
+      if (!user) {
+        const savedMessages = localStorage.getItem(`chat_history_${id}`);
+        if (savedMessages) {
+          try {
+            const parsed = JSON.parse(savedMessages);
+            setMessages(parsed.map((msg: any) => ({
+              ...msg,
+              timestamp: new Date(msg.timestamp)
+            })));
+          } catch (error) {
+            console.error('Error loading chat history:', error);
+          }
+        }
+      }
+    };
+
+    initializeSession();
+  }, [user]);
+
+  // Save messages to localStorage for non-logged users
+  useEffect(() => {
+    if (!user && sessionId && messages.length > 1) {
+      localStorage.setItem(`chat_history_${sessionId}`, JSON.stringify(messages));
+    }
+  }, [messages, user, sessionId]);
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return;
@@ -47,22 +82,40 @@ const AIAssistant = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('chat-with-jarvis', {
-        body: { message: currentMessage },
-      });
+      // For non-logged users, we'll simulate a response since we can't call the edge function
+      if (!user) {
+        // Simulate AI response delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          type: 'ai',
+          content: `Thank you for your message! I'm Jarvis, Sifeddine's AI assistant. While I can chat with you here, for the full AI experience and to save our conversation history, please consider logging in. 
 
-      if (error) {
-        throw error;
+Regarding "${currentMessage}" - I'd be happy to help! Sifeddine is a full-stack developer specializing in React, Node.js, Python, and AI/ML technologies. Feel free to ask me anything about his work or projects!`,
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, aiMessage]);
+      } else {
+        // For logged-in users, call the edge function
+        const { data, error } = await supabase.functions.invoke('chat-with-jarvis', {
+          body: { message: currentMessage },
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          type: 'ai',
+          content: data.response,
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, aiMessage]);
       }
-
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        type: 'ai',
-        content: data.response,
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error('Error calling Jarvis:', error);
       toast({
@@ -93,24 +146,24 @@ const AIAssistant = () => {
 
   return (
     <>
-      {/* Floating AI Button - More visible and responsive */}
+      {/* Floating AI Button - More visible */}
       <Button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 w-14 h-14 md:w-16 md:h-16 rounded-full shadow-xl bg-primary hover:bg-primary/90 border-2 border-primary-foreground/20 hover:border-primary-foreground/40 transition-all duration-300 ${
-          isOpen ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100 hover:scale-105'
+        className={`fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 w-16 h-16 md:w-18 md:h-18 rounded-full shadow-2xl bg-primary hover:bg-primary/90 border-4 border-primary-foreground/30 hover:border-primary-foreground/50 transition-all duration-300 ${
+          isOpen ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100 hover:scale-110'
         }`}
         size="icon"
       >
-        <MessageCircle className="h-6 w-6 md:h-7 md:w-7 text-primary-foreground" />
+        <MessageCircle className="h-8 w-8 md:h-9 md:w-9 text-primary-foreground drop-shadow-lg" />
         <span className="sr-only">Open AI Assistant</span>
       </Button>
 
       {/* Chat Interface - Better mobile support */}
       {isOpen && (
-        <Card className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 w-[calc(100vw-2rem)] max-w-96 h-[70vh] max-h-[600px] md:h-[500px] glass-effect border-primary/20 shadow-2xl animate-in slide-in-from-bottom-2 slide-in-from-right-2">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 px-4 md:px-6">
+        <Card className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 w-[calc(100vw-2rem)] max-w-96 h-[75vh] max-h-[600px] md:h-[500px] glass-effect border-primary/30 shadow-2xl animate-in slide-in-from-bottom-2 slide-in-from-right-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 px-4 md:px-6 border-b border-border/20">
             <CardTitle className="text-lg md:text-xl font-semibold flex items-center gap-2">
-              <Bot className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+              <Bot className="h-6 w-6 md:h-7 md:w-7 text-primary" />
               Jarvis AI
             </CardTitle>
             <Button
@@ -124,7 +177,7 @@ const AIAssistant = () => {
             </Button>
           </CardHeader>
           
-          <CardContent className="flex flex-col h-[calc(70vh-5rem)] max-h-[520px] md:h-[420px] p-3 md:p-4">
+          <CardContent className="flex flex-col h-[calc(75vh-6rem)] max-h-[520px] md:h-[420px] p-3 md:p-4">
             {/* Messages Area */}
             <ScrollArea className="flex-1 pr-2 mb-4">
               <div className="space-y-3 md:space-y-4">
@@ -135,12 +188,12 @@ const AIAssistant = () => {
                       message.type === 'user' ? 'flex-row-reverse' : ''
                     }`}
                   >
-                    <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 ${
+                    <div className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center shrink-0 ${
                       message.type === 'user' 
                         ? 'bg-primary text-primary-foreground' 
                         : 'bg-muted text-muted-foreground'
                     }`}>
-                      {message.type === 'user' ? <User className="h-3 w-3 md:h-4 md:w-4" /> : <Bot className="h-3 w-3 md:h-4 md:w-4" />}
+                      {message.type === 'user' ? <User className="h-4 w-4 md:h-5 md:w-5" /> : <Bot className="h-4 w-4 md:h-5 md:w-5" />}
                     </div>
                     <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm md:text-base leading-relaxed ${
                       message.type === 'user'
@@ -154,8 +207,8 @@ const AIAssistant = () => {
                 
                 {isLoading && (
                   <div className="flex items-start gap-2 md:gap-3">
-                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-muted flex items-center justify-center">
-                      <Bot className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                    <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-muted flex items-center justify-center">
+                      <Bot className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
                     </div>
                     <div className="bg-muted rounded-lg px-3 py-2 text-sm md:text-base">
                       <div className="flex space-x-1">
@@ -190,12 +243,10 @@ const AIAssistant = () => {
               </Button>
             </div>
             
-            {/* Status indicator for logged-in users */}
-            {user && (
-              <p className="text-xs text-muted-foreground mt-2 text-center">
-                Chat history is saved for logged-in users
-              </p>
-            )}
+            {/* Status indicator */}
+            <p className="text-xs text-muted-foreground mt-2 text-center">
+              {user ? 'Chat history is saved for logged-in users' : 'Chat history saved locally. Login for full AI features!'}
+            </p>
           </CardContent>
         </Card>
       )}

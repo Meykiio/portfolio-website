@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -14,9 +15,20 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+    }
+  }, [user, isAdmin, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,16 +42,15 @@ const Login = () => {
         title: "Login Failed",
         description: error.message,
       });
+      setLoading(false);
     } else {
       toast({
         title: "Access Granted",
-        description: "Welcome back, admin.",
+        description: "Welcome back!",
       });
-      navigate('/');
+      setIsDialogOpen(false);
+      // Navigation will be handled by the useEffect above
     }
-    
-    setLoading(false);
-    setIsDialogOpen(false);
   };
 
   return (

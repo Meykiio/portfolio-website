@@ -1,3 +1,4 @@
+
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Projects from "@/components/Projects";
@@ -7,8 +8,12 @@ import Contact from "@/components/Contact";
 import Silk from "@/components/Silk";
 import AIAssistant from "@/components/AIAssistant";
 import FloatingElements from "@/components/FloatingElements";
+import { useAuth } from "@/contexts/AuthContext";
+import { Link } from "react-router-dom";
 
 const Index = () => {
+  const { user, isAdmin } = useAuth();
+
   return (
     <div className="min-h-screen bg-background text-foreground relative">
       {/* Global Silk Background */}
@@ -47,9 +52,16 @@ const Index = () => {
             <a href="#contact" className="hover:text-primary transition-colors duration-200">
               Contact
             </a>
-            <a href="/admin" className="hover:text-primary transition-colors duration-200">
-              Admin
-            </a>
+            {user && isAdmin && (
+              <Link to="/admin" className="hover:text-primary transition-colors duration-200">
+                Admin
+              </Link>
+            )}
+            {!user && (
+              <Link to="/login" className="hover:text-primary transition-colors duration-200">
+                Login
+              </Link>
+            )}
           </div>
         </div>
       </nav>
