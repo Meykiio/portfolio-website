@@ -1,175 +1,156 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import Silk from '@/components/Silk';
 import MetaBalls from '@/components/MetaBalls';
+import Silk from '@/components/Silk';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { signIn, user, isAdmin } = useAuth();
+  const [error, setError] = useState('');
+  const { signIn, user, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Redirect if already logged in
+  // Redirect logic based on user role
   useEffect(() => {
-    if (user) {
+    if (!authLoading && user) {
+      console.log('User logged in, checking admin status:', isAdmin);
       if (isAdmin) {
-        navigate('/admin');
+        console.log('Redirecting admin to /admin');
+        navigate('/admin', { replace: true });
       } else {
-        navigate('/');
+        console.log('Redirecting regular user to /');
+        navigate('/', { replace: true });
       }
     }
-  }, [user, isAdmin, navigate]);
+  }, [user, isAdmin, authLoading, navigate]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
-    const { error } = await signIn(email, password);
-    
-    if (error) {
+    try {
+      const { error } = await signIn(email, password);
+      
+      if (error) {
+        console.error('Login error:', error);
+        setError(error.message || 'Failed to sign in');
+        toast({
+          title: "Login Failed",
+          description: error.message || 'Failed to sign in',
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Welcome back!",
+          description: "You have been signed in successfully.",
+        });
+      }
+    } catch (error) {
+      console.error('Unexpected login error:', error);
+      setError('An unexpected error occurred');
       toast({
+        title: "Error",
+        description: "An unexpected error occurred",
         variant: "destructive",
-        title: "Login Failed",
-        description: error.message,
       });
+    } finally {
       setLoading(false);
-    } else {
-      toast({
-        title: "Access Granted",
-        description: "Welcome back!",
-      });
-      setIsDialogOpen(false);
-      // Navigation will be handled by the useEffect above
     }
   };
 
+  // Show loading state while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-dark flex items-center justify-center relative overflow-hidden">
+        <div className="fixed inset-0 z-0">
+          <MetaBalls />
+          <Silk />
+        </div>
+        <div className="text-electric-cyan">Loading...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
-      {/* Red Silk Background */}
-      <div className="fixed inset-0 opacity-30 pointer-events-none">
-        <Silk
-          speed={3}
-          scale={1.2}
-          color="#FF0000"
-          noiseIntensity={2}
-          rotation={45}
-        />
+    <div className="min-h-screen bg-dark flex items-center justify-center relative overflow-hidden p-4">
+      {/* Background Effects */}
+      <div className="fixed inset-0 z-0">
+        <MetaBalls />
+        <Silk />
       </div>
 
-      {/* Red MetaBalls */}
-      <div className="fixed inset-0 opacity-40 pointer-events-none">
-        <MetaBalls
-          color="#FF0000"
-          cursorBallColor="#FF4444"
-          speed={0.2}
-          ballCount={8}
-          animationSize={25}
-          enableTransparency={true}
-        />
-      </div>
-
-      {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4">
-        {/* Warning Header */}
-        <div className="text-center mb-8 animate-pulse">
-          <div className="text-6xl md:text-8xl font-bold text-red-500 mb-4 font-mono">
-            ⚠️ SYSTEM BREACH ⚠️
-          </div>
-          <div className="text-xl md:text-2xl text-red-400 font-mono mb-2">
-            UNAUTHORIZED ACCESS DETECTED
-          </div>
-          <div className="text-lg md:text-xl text-muted-foreground font-mono">
-            Your system has been compromised
-          </div>
-        </div>
-
-        {/* Fake Error Messages */}
-        <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-4 md:p-6 max-w-md w-full mb-8 font-mono text-sm">
-          <div className="text-red-400 mb-2">[ERROR] Security protocols breached</div>
-          <div className="text-red-400 mb-2">[ERROR] Data extraction in progress...</div>
-          <div className="text-red-400 mb-2">[ERROR] Firewall disabled</div>
-          <div className="text-green-400">[SUCCESS] Backdoor installed</div>
-        </div>
-
-        {/* Fake System Info */}
-        <div className="text-center mb-8 font-mono text-sm text-muted-foreground">
-          <div>IP: {Math.floor(Math.random() * 256)}.{Math.floor(Math.random() * 256)}.{Math.floor(Math.random() * 256)}.{Math.floor(Math.random() * 256)}</div>
-          <div>Location: Unknown</div>
-          <div>Status: COMPROMISED</div>
-        </div>
-
-        {/* Fake Download Button */}
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button 
-              size="lg" 
-              className="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-lg border-2 border-red-400 shadow-lg hover:shadow-red-500/25 transition-all duration-300 text-lg animate-bounce"
-            >
-              🦠 DOWNLOAD MALWARE 🦠
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md bg-card border-red-500/20">
-            <DialogHeader>
-              <DialogTitle className="text-center text-red-400 font-mono">
-                ADMIN ACCESS REQUIRED
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <Label htmlFor="email" className="text-foreground font-mono">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="bg-background border-border"
-                  placeholder="admin@system.local"
-                />
-              </div>
-              <div>
-                <Label htmlFor="password" className="text-foreground font-mono">
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="bg-background border-border"
-                  placeholder="Enter admin password"
-                />
-              </div>
-              <Button 
-                type="submit" 
+      {/* Login Form */}
+      <Card className="w-full max-w-md relative z-10 glass-effect border-electric-cyan/20">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-space-grotesk text-white">
+            Welcome Back
+          </CardTitle>
+          <CardDescription className="text-gray-400">
+            Sign in to access your dashboard
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <Alert variant="destructive" className="bg-red-900/20 border-red-500/20">
+                <AlertDescription className="text-red-300">
+                  {error}
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium text-gray-300">
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="bg-dark/50 border-gray-700 text-white placeholder:text-gray-500 focus:border-electric-cyan"
                 disabled={loading}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-mono"
-              >
-                {loading ? 'AUTHENTICATING...' : 'GRANT ACCESS'}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-        {/* Bottom Text */}
-        <div className="text-center mt-8 font-mono text-xs text-muted-foreground">
-          <div>Just kidding! This is actually Sifeddine's portfolio.</div>
-          <div className="mt-2">Admin login required to access the dashboard.</div>
-        </div>
-      </div>
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="password" className="text-sm font-medium text-gray-300">
+                Password
+              </label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="bg-dark/50 border-gray-700 text-white placeholder:text-gray-500 focus:border-electric-cyan"
+                disabled={loading}
+              />
+            </div>
+            
+            <Button
+              type="submit"
+              className="w-full bg-electric-cyan text-dark hover:bg-electric-cyan/90 font-medium"
+              disabled={loading}
+            >
+              {loading ? 'Signing in...' : 'Sign In'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 };

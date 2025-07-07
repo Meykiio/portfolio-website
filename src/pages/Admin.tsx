@@ -2,115 +2,225 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ProjectsManager } from '@/components/admin/ProjectsManager';
-import { BlogsManager } from '@/components/admin/BlogsManager';
-import { MessagesManager } from '@/components/admin/MessagesManager';
-import { AiChatsManager } from '@/components/admin/AiChatsManager';
-import { LogOut, Database, MessageSquare, FileText, Code, Bot } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { LogOut, Users, MessageSquare, FileText, BarChart3, Settings, Folder } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import ProjectsManager from '@/components/admin/ProjectsManager';
+import BlogsManager from '@/components/admin/BlogsManager';
+import MessagesManager from '@/components/admin/MessagesManager';
+import AiChatsManager from '@/components/admin/AiChatsManager';
+import AdminLoadingState from '@/components/admin/AdminLoadingState';
 
 const Admin = () => {
-  const { signOut } = useAuth();
+  const { user, signOut, loading, isAdmin } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState('overview');
+  const [signOutLoading, setSignOutLoading] = useState(false);
 
   const handleSignOut = async () => {
-    await signOut();
+    setSignOutLoading(true);
+    try {
+      await signOut();
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
+      });
+      navigate('/', { replace: true });
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSignOutLoading(false);
+    }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Admin Dashboard
-            </h1>
-            <p className="text-gray-400 mt-2">Manage your website content and data</p>
-          </div>
-          <Button onClick={handleSignOut} variant="outline" className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white">
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
+  // Show loading state while checking authentication
+  if (loading) {
+    return <AdminLoadingState />;
+  }
+
+  // This should be handled by ProtectedRoute, but adding as backup
+  if (!user || !isAdmin) {
+    return (
+      <div className="min-h-screen bg-dark flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">Access Denied</h1>
+          <p className="text-gray-400 mb-6">You don't have permission to access this page.</p>
+          <Button onClick={() => navigate('/')} className="bg-electric-cyan text-dark hover:bg-electric-cyan/90">
+            Go Home
           </Button>
         </div>
+      </div>
+    );
+  }
 
-        <Tabs defaultValue="projects" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-gray-800 border border-gray-700">
-            <TabsTrigger value="projects" className="flex items-center gap-2">
-              <Code className="w-4 h-4" />
+  return (
+    <div className="min-h-screen bg-dark">
+      {/* Header */}
+      <div className="border-b border-gray-800 bg-gray-900/50">
+        <div className="flex items-center justify-between p-6">
+          <div>
+            <h1 className="text-2xl font-bold text-white font-space-grotesk">
+              Admin Dashboard
+            </h1>
+            <p className="text-gray-400 mt-1">
+              Welcome back, {user.email}
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/')}
+              className="border-gray-700 text-gray-300 hover:bg-gray-800"
+            >
+              View Site
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleSignOut}
+              disabled={signOutLoading}
+              className="border-gray-700 text-gray-300 hover:bg-gray-800"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              {signOutLoading ? 'Signing out...' : 'Sign Out'}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="p-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="bg-gray-900 border-gray-800 p-1">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-electric-cyan data-[state=active]:text-dark">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="projects" className="data-[state=active]:bg-electric-cyan data-[state=active]:text-dark">
+              <Folder className="w-4 h-4 mr-2" />
               Projects
             </TabsTrigger>
-            <TabsTrigger value="blogs" className="flex items-center gap-2">
-              <FileText className="w-4 h-4" />
+            <TabsTrigger value="blogs" className="data-[state=active]:bg-electric-cyan data-[state=active]:text-dark">
+              <FileText className="w-4 h-4 mr-2" />
               Blogs
             </TabsTrigger>
-            <TabsTrigger value="messages" className="flex items-center gap-2">
-              <MessageSquare className="w-4 h-4" />
+            <TabsTrigger value="messages" className="data-[state=active]:bg-electric-cyan data-[state=active]:text-dark">
+              <MessageSquare className="w-4 h-4 mr-2" />
               Messages
             </TabsTrigger>
-            <TabsTrigger value="ai-chats" className="flex items-center gap-2">
-              <Bot className="w-4 h-4" />
+            <TabsTrigger value="ai-chats" className="data-[state=active]:bg-electric-cyan data-[state=active]:text-dark">
+              <Users className="w-4 h-4 mr-2" />
               AI Chats
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="projects">
-            <Card className="bg-gray-800 border-gray-700">
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="bg-gray-900 border-gray-800">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-electric-cyan text-sm font-medium">
+                    Total Projects
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-white">--</div>
+                  <p className="text-xs text-gray-400 mt-1">Loading...</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gray-900 border-gray-800">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-electric-cyan text-sm font-medium">
+                    Blog Posts
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-white">--</div>
+                  <p className="text-xs text-gray-400 mt-1">Loading...</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gray-900 border-gray-800">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-electric-cyan text-sm font-medium">
+                    Messages
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-white">--</div>
+                  <p className="text-xs text-gray-400 mt-1">Loading...</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gray-900 border-gray-800">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-electric-cyan text-sm font-medium">
+                    AI Conversations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-white">--</div>
+                  <p className="text-xs text-gray-400 mt-1">Loading...</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Code className="w-5 h-5" />
-                  Projects Management
-                </CardTitle>
-                <CardDescription>Create, edit, and manage your portfolio projects</CardDescription>
+                <CardTitle className="text-white">Quick Actions</CardTitle>
+                <CardDescription className="text-gray-400">
+                  Common administrative tasks
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ProjectsManager />
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button
+                    onClick={() => setActiveTab('projects')}
+                    className="bg-electric-cyan text-dark hover:bg-electric-cyan/90 justify-start"
+                  >
+                    <Folder className="w-4 h-4 mr-2" />
+                    Manage Projects
+                  </Button>
+                  <Button
+                    onClick={() => setActiveTab('messages')}
+                    className="bg-gray-800 text-white hover:bg-gray-700 justify-start"
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Check Messages
+                  </Button>
+                  <Button
+                    onClick={() => setActiveTab('blogs')}
+                    className="bg-gray-800 text-white hover:bg-gray-700 justify-start"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Write Blog Post
+                  </Button>
+                </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="projects">
+            <ProjectsManager />
           </TabsContent>
 
           <TabsContent value="blogs">
-            <Card className="bg-gray-800 border-gray-700">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  Blog Management
-                </CardTitle>
-                <CardDescription>Create, edit, and publish blog posts</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <BlogsManager />
-              </CardContent>
-            </Card>
+            <BlogsManager />
           </TabsContent>
 
           <TabsContent value="messages">
-            <Card className="bg-gray-800 border-gray-700">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5" />
-                  Contact Messages
-                </CardTitle>
-                <CardDescription>View and manage contact form messages</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <MessagesManager />
-              </CardContent>
-            </Card>
+            <MessagesManager />
           </TabsContent>
 
           <TabsContent value="ai-chats">
-            <Card className="bg-gray-800 border-gray-700">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bot className="w-5 h-5" />
-                  AI Chat History
-                </CardTitle>
-                <CardDescription>View Jarvis AI chat conversations</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <AiChatsManager />
-              </CardContent>
-            </Card>
+            <AiChatsManager />
           </TabsContent>
         </Tabs>
       </div>
