@@ -1,19 +1,20 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useForm } from 'react-hook-form';
-import { Plus, Edit, Trash2, Eye, ExternalLink } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, ExternalLink, FileText, Image, Settings } from 'lucide-react';
 import { toast } from 'sonner';
+import RichTextEditor from './RichTextEditor';
+import ImageUploadManager from './ImageUploadManager';
 
 interface Project {
   id: string;
@@ -43,6 +44,7 @@ interface ProjectFormData {
 export const ProjectsManager = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [activeTab, setActiveTab] = useState('content');
   const queryClient = useQueryClient();
 
   const form = useForm<ProjectFormData>({
@@ -168,6 +170,13 @@ export const ProjectsManager = () => {
     }
   };
 
+  const handleNewProject = () => {
+    setEditingProject(null);
+    form.reset();
+    setActiveTab('content');
+    setIsDialogOpen(true);
+  };
+
   if (isLoading) {
     return <div className="text-center py-8">Loading projects...</div>;
   }
@@ -178,133 +187,205 @@ export const ProjectsManager = () => {
         <h3 className="text-lg font-semibold">Projects ({projects?.length || 0})</h3>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => { setEditingProject(null); form.reset(); }}>
+            <Button onClick={handleNewProject} className="bg-electric-cyan text-dark hover:bg-electric-cyan/90">
               <Plus className="w-4 h-4 mr-2" />
               Add Project
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-gray-800 border-gray-700">
+          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-gray-800 border-gray-700">
             <DialogHeader>
               <DialogTitle>{editingProject ? 'Edit Project' : 'Create New Project'}</DialogTitle>
             </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Title</FormLabel>
-                      <FormControl>
-                        <Input {...field} className="bg-gray-700 border-gray-600" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} className="bg-gray-700 border-gray-600" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="content"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Content (Markdown)</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={6} className="bg-gray-700 border-gray-600" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="image_url"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Image URL</FormLabel>
-                        <FormControl>
-                          <Input {...field} className="bg-gray-700 border-gray-600" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="demo_url"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Demo URL</FormLabel>
-                        <FormControl>
-                          <Input {...field} className="bg-gray-700 border-gray-600" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <FormField
-                  control={form.control}
-                  name="github_url"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>GitHub URL</FormLabel>
-                      <FormControl>
-                        <Input {...field} className="bg-gray-700 border-gray-600" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="technologies"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Technologies (comma-separated)</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="React, TypeScript, Node.js" className="bg-gray-700 border-gray-600" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="featured"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center space-x-2">
-                      <FormLabel>Featured Project</FormLabel>
-                      <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex justify-end space-x-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit">
-                    {editingProject ? 'Update' : 'Create'} Project
-                  </Button>
-                </div>
-              </form>
-            </Form>
+            
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-3 bg-gray-900">
+                <TabsTrigger value="content" className="data-[state=active]:bg-electric-cyan data-[state=active]:text-dark">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Content
+                </TabsTrigger>
+                <TabsTrigger value="media" className="data-[state=active]:bg-electric-cyan data-[state=active]:text-dark">
+                  <Image className="w-4 h-4 mr-2" />
+                  Media
+                </TabsTrigger>
+                <TabsTrigger value="settings" className="data-[state=active]:bg-electric-cyan data-[state=active]:text-dark">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Settings
+                </TabsTrigger>
+              </TabsList>
+
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
+                  <TabsContent value="content" className="space-y-4 mt-6">
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-300">Project Title</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              className="bg-gray-700 border-gray-600 text-white"
+                              placeholder="Enter project title..."
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-300">Short Description</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              className="bg-gray-700 border-gray-600 text-white"
+                              placeholder="Brief description for project cards..."
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="content"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-300">Detailed Content</FormLabel>
+                          <FormControl>
+                            <RichTextEditor
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="Write detailed project information, features, technical details..."
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="media" className="space-y-4 mt-6">
+                    <FormField
+                      control={form.control}
+                      name="image_url"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <ImageUploadManager
+                              value={field.value}
+                              onChange={field.onChange}
+                              label="Project Screenshot/Image"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="settings" className="space-y-4 mt-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="demo_url"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-300">Demo URL</FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field} 
+                                className="bg-gray-700 border-gray-600 text-white"
+                                placeholder="https://demo.example.com"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="github_url"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-300">GitHub URL</FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field} 
+                                className="bg-gray-700 border-gray-600 text-white"
+                                placeholder="https://github.com/username/repo"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="technologies"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-300">Technologies (comma-separated)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              placeholder="React, TypeScript, Node.js, PostgreSQL"
+                              className="bg-gray-700 border-gray-600 text-white"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="featured"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center justify-between p-4 bg-gray-800 rounded border border-gray-700">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-gray-300">Featured Project</FormLabel>
+                            <p className="text-sm text-gray-500">
+                              Featured projects appear prominently on the homepage
+                            </p>
+                          </div>
+                          <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <div className="flex justify-end space-x-2 mt-6 pt-4 border-t border-gray-700">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setIsDialogOpen(false)}
+                      className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit"
+                      className="bg-electric-cyan text-dark hover:bg-electric-cyan/90"
+                    >
+                      {editingProject ? 'Update' : 'Create'} Project
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </Tabs>
           </DialogContent>
         </Dialog>
       </div>
