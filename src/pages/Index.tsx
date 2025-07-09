@@ -1,16 +1,17 @@
 
 import Hero from "@/components/Hero";
+import { Suspense } from "react";
 import About from "@/components/About";
 import Projects from "@/components/Projects";
 import Lab from "@/components/Lab";
 import Mindset from "@/components/Mindset";
 import Contact from "@/components/Contact";
-import AIAssistant from "@/components/AIAssistant";
 import FloatingElements from "@/components/FloatingElements";
 import { Button } from "@/components/ui/button";
 import { LogIn, Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { AIAssistant, MetaBalls, Silk } from "@/components/LazyComponents";
 
 const Index = () => {
   const { user, isAdmin, signOut, loading } = useAuth();
@@ -90,7 +91,9 @@ const Index = () => {
       </main>
 
       {/* AI Assistant - Available to all users */}
-      <AIAssistant />
+      <Suspense fallback={null}>
+        <AIAssistant />
+      </Suspense>
     </div>
   );
 };

@@ -1,19 +1,26 @@
 
 import React, { useState } from 'react';
+import { Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LogOut, Users, MessageSquare, FileText, BarChart3, Settings, Folder } from 'lucide-react';
+import { LogOut, Users, MessageSquare, FileText, BarChart3, Settings, Folder, Activity, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { ProjectsManager } from '@/components/admin/ProjectsManager';
-import { BlogsManager } from '@/components/admin/BlogsManager';
-import { MessagesManager } from '@/components/admin/MessagesManager';
-import { AiChatsManager } from '@/components/admin/AiChatsManager';
 import AdminLoadingState from '@/components/admin/AdminLoadingState';
-import AdminDashboard from '@/components/admin/AdminDashboard';
-import AdminSettings from '@/components/admin/AdminSettings';
+import PerformanceMonitor from '@/components/PerformanceMonitor';
+import SecurityAudit from '@/components/SecurityAudit';
+
+// Lazy load admin components for better performance
+import { 
+  AdminDashboard,
+  AdminSettings,
+  ProjectsManager,
+  BlogsManager,
+  MessagesManager,
+  AiChatsManager
+} from '@/components/LazyComponents';
 
 const Admin = () => {
   const { user, signOut, loading, isAdmin } = useAuth();
@@ -125,30 +132,58 @@ const Admin = () => {
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </TabsTrigger>
+            <TabsTrigger value="performance" className="data-[state=active]:bg-electric-cyan data-[state=active]:text-dark">
+              <Activity className="w-4 h-4 mr-2" />
+              Performance
+            </TabsTrigger>
+            <TabsTrigger value="security" className="data-[state=active]:bg-electric-cyan data-[state=active]:text-dark">
+              <Shield className="w-4 h-4 mr-2" />
+              Security
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <AdminDashboard />
+            <Suspense fallback={<AdminLoadingState />}>
+              <AdminDashboard />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="projects">
-            <ProjectsManager />
+            <Suspense fallback={<AdminLoadingState />}>
+              <ProjectsManager />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="blogs">
-            <BlogsManager />
+            <Suspense fallback={<AdminLoadingState />}>
+              <BlogsManager />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="messages">
-            <MessagesManager />
+            <Suspense fallback={<AdminLoadingState />}>
+              <MessagesManager />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="ai-chats">
-            <AiChatsManager />
+            <Suspense fallback={<AdminLoadingState />}>
+              <AiChatsManager />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="settings">
-            <AdminSettings />
+            <Suspense fallback={<AdminLoadingState />}>
+              <AdminSettings />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="performance">
+            <PerformanceMonitor />
+          </TabsContent>
+
+          <TabsContent value="security">
+            <SecurityAudit />
           </TabsContent>
         </Tabs>
       </div>

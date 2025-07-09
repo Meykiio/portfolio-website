@@ -7,8 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import MetaBalls from '@/components/MetaBalls';
-import Silk from '@/components/Silk';
+import { Suspense } from 'react';
+import { MetaBalls, Silk } from '@/components/LazyComponents';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -73,8 +73,10 @@ const Login = () => {
     return (
       <div className="min-h-screen bg-dark flex items-center justify-center relative overflow-hidden">
         <div className="fixed inset-0 z-0">
-          <MetaBalls />
-          <Silk />
+          <Suspense fallback={null}>
+            <MetaBalls />
+            <Silk />
+          </Suspense>
         </div>
         <div className="text-electric-cyan">Loading...</div>
       </div>
@@ -85,8 +87,10 @@ const Login = () => {
     <div className="min-h-screen bg-dark flex items-center justify-center relative overflow-hidden p-4">
       {/* Background Effects */}
       <div className="fixed inset-0 z-0">
-        <MetaBalls />
-        <Silk />
+        <Suspense fallback={null}>
+          <MetaBalls />
+          <Silk />
+        </Suspense>
       </div>
 
       {/* Login Form */}
