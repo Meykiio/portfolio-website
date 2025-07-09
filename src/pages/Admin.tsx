@@ -12,6 +12,8 @@ import { BlogsManager } from '@/components/admin/BlogsManager';
 import { MessagesManager } from '@/components/admin/MessagesManager';
 import { AiChatsManager } from '@/components/admin/AiChatsManager';
 import AdminLoadingState from '@/components/admin/AdminLoadingState';
+import AdminDashboard from '@/components/admin/AdminDashboard';
+import AdminSettings from '@/components/admin/AdminSettings';
 
 const Admin = () => {
   const { user, signOut, loading, isAdmin } = useAuth();
@@ -119,92 +121,14 @@ const Admin = () => {
               <Users className="w-4 h-4 mr-2" />
               AI Chats
             </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-electric-cyan data-[state=active]:text-dark">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-gray-900 border-gray-800">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-electric-cyan text-sm font-medium">
-                    Total Projects
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-white">--</div>
-                  <p className="text-xs text-gray-400 mt-1">Loading...</p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gray-900 border-gray-800">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-electric-cyan text-sm font-medium">
-                    Blog Posts
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-white">--</div>
-                  <p className="text-xs text-gray-400 mt-1">Loading...</p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gray-900 border-gray-800">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-electric-cyan text-sm font-medium">
-                    Messages
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-white">--</div>
-                  <p className="text-xs text-gray-400 mt-1">Loading...</p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gray-900 border-gray-800">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-electric-cyan text-sm font-medium">
-                    AI Conversations
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-white">--</div>
-                  <p className="text-xs text-gray-400 mt-1">Loading...</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card className="bg-gray-900 border-gray-800">
-              <CardHeader>
-                <CardTitle className="text-white">Quick Actions</CardTitle>
-                <CardDescription className="text-gray-400">
-                  Common administrative tasks
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Button
-                    onClick={() => setActiveTab('projects')}
-                    className="bg-electric-cyan text-dark hover:bg-electric-cyan/90 justify-start"
-                  >
-                    <Folder className="w-4 h-4 mr-2" />
-                    Manage Projects
-                  </Button>
-                  <Button
-                    onClick={() => setActiveTab('messages')}
-                    className="bg-gray-800 text-white hover:bg-gray-700 justify-start"
-                  >
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    Check Messages
-                  </Button>
-                  <Button
-                    onClick={() => setActiveTab('blogs')}
-                    className="bg-gray-800 text-white hover:bg-gray-700 justify-start"
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    Write Blog Post
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <AdminDashboard />
           </TabsContent>
 
           <TabsContent value="projects">
@@ -221,6 +145,10 @@ const Admin = () => {
 
           <TabsContent value="ai-chats">
             <AiChatsManager />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <AdminSettings />
           </TabsContent>
         </Tabs>
       </div>
