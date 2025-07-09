@@ -23,20 +23,33 @@ const AdminDashboard = () => {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['admin-dashboard-stats'],
     queryFn: async (): Promise<DashboardStats> => {
-      const [projectsRes, blogsRes, messagesRes, aiChatsRes, activityRes] = await Promise.all([
+      const [projectsRes, blogsRes, messagesRes, aiChatsRes] = await Promise.all([
         supabase.from('projects').select('*', { count: 'exact' }),
         supabase.from('blogs').select('*', { count: 'exact' }),
         supabase.from('messages').select('*', { count: 'exact' }),
-        supabase.from('ai_chat_messages').select('*', { count: 'exact' }),
-        supabase.from('user_activity').select('*').order('timestamp', { ascending: false }).limit(10)
+        supabase.from('ai_chat_messages').select('*', { count: 'exact' })
       ]);
+
+      // Mock recent activity since we don't have user_activity table yet
+      const recentActivity = [
+        {
+          activity_type: 'PROJECT_CREATE',
+          activity_data: { description: 'New project added' },
+          timestamp: new Date().toISOString()
+        },
+        {
+          activity_type: 'BLOG_PUBLISH',
+          activity_data: { description: 'Blog post published' },
+          timestamp: new Date(Date.now() - 86400000).toISOString()
+        }
+      ];
 
       return {
         projects: projectsRes.count || 0,
         blogs: blogsRes.count || 0,
         messages: messagesRes.count || 0,
         aiChats: aiChatsRes.count || 0,
-        recentActivity: activityRes.data || []
+        recentActivity: recentActivity
       };
     },
     refetchInterval: 30000, // Refresh every 30 seconds

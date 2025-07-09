@@ -89,7 +89,7 @@ const BatchOperations: React.FC<BatchOperationsProps> = ({
   const selectedCount = selectedItems.length;
   const totalCount = items.length;
   const isAllSelected = selectedCount === totalCount && totalCount > 0;
-  const isIndeterminate = selectedCount > 0 && selectedCount < totalCount;
+  const isPartiallySelected = selectedCount > 0 && selectedCount < totalCount;
 
   return (
     <div className="space-y-4">
@@ -97,12 +97,18 @@ const BatchOperations: React.FC<BatchOperationsProps> = ({
       <div className="flex items-center justify-between bg-gray-800 p-4 rounded-lg border border-gray-700">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <Checkbox
-              checked={isAllSelected}
-              indeterminate={isIndeterminate}
-              onCheckedChange={handleSelectAll}
-              className="border-gray-600"
-            />
+            <div className="relative">
+              <Checkbox
+                checked={isAllSelected}
+                onCheckedChange={handleSelectAll}
+                className="border-gray-600"
+              />
+              {isPartiallySelected && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-2 h-2 bg-electric-cyan rounded-sm" />
+                </div>
+              )}
+            </div>
             <span className="text-sm text-gray-300">
               Select All ({totalCount} items)
             </span>
