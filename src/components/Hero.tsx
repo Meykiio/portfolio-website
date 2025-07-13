@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import TextScramble from "./TextScramble";
 
@@ -17,20 +16,28 @@ const Hero = () => {
         {/* Name and Title */}
         <div className="space-y-3 md:space-y-4">
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-space font-bold text-foreground">
-            Sifeddine
+            Hey, I'm Sifeddine.
           </h1>
           <div className="text-lg sm:text-xl md:text-2xl font-mono text-primary">
             <TextScramble
-              text="Full-Stack Developer & AI Enthusiast"
+              text="I like building things that run without me."
               className="inline-block"
             />
           </div>
         </div>
 
-        {/* Tagline */}
-        <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
-          Building systems, not stress. Creating elegant solutions for complex problems.
-        </p>
+        {/* Main Content */}
+        <div className="space-y-6 text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
+          <p>
+            Not in a lazy way — in a "my time is worth more than repetition" kind of way. 
+            If something feels boring, I try to systemize it. If something feels broken, 
+            I turn it into a tool. If it makes me curious, I stay with it until it turns 
+            into something weird or useful.
+          </p>
+          <p className="text-primary font-medium">
+            Welcome to the space where all that lives.
+          </p>
+        </div>
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center pt-4 md:pt-6 px-4">
@@ -39,7 +46,15 @@ const Hero = () => {
             className="font-mono text-base md:text-lg px-6 md:px-8 py-4 md:py-6"
             onClick={() => scrollToSection('projects')}
           >
-            View My Work
+            See What I Build
+          </Button>
+          <Button 
+            variant="outline" 
+            size="lg" 
+            className="font-mono text-base md:text-lg px-6 md:px-8 py-4 md:py-6 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+            onClick={() => scrollToSection('mindset')}
+          >
+            Read My Mindset
           </Button>
           <Button 
             variant="outline" 
@@ -47,7 +62,7 @@ const Hero = () => {
             className="font-mono text-base md:text-lg px-6 md:px-8 py-4 md:py-6 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
             onClick={() => scrollToSection('contact')}
           >
-            Get In Touch
+            Pitch Me Something Weird
           </Button>
         </div>
 

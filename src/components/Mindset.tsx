@@ -7,7 +7,7 @@ const Mindset = () => {
   ];
 
   return (
-    <section className="py-20 px-6">
+    <section id="mindset" className="py-20 px-6">
       <div className="max-w-4xl mx-auto">
         <h2 className="font-space text-4xl md:text-5xl font-bold text-center mb-16">
           Mindset

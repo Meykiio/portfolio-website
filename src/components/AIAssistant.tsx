@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,8 +22,13 @@ const AIAssistant = () => {
   const [loading, setLoading] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { toast } = useToast();
+
+  // Don't show AI assistant for admin users
+  if (isAdmin) {
+    return null;
+  }
 
   // Anonymous session management
   const getAnonymousSessionId = () => {
@@ -121,44 +125,67 @@ const AIAssistant = () => {
     setMessages(prev => [...prev, tempUserMsg]);
 
     try {
-      const { data, error } = await supabase.functions.invoke('chat-with-jarvis', {
-        body: { 
+      // For anonymous users, simulate AI response
+      if (!user) {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        const aiResponse = `Hello! I'm Sifeddine's AI assistant. I'd be happy to help you learn more about his work and projects. However, for the full AI experience with persistent chat history, please consider creating an account. 
+
+For now, I can tell you that Sifeddine is a full-stack developer based in Algiers who specializes in building systems that "run without him." He's passionate about automation, AI, and creating tools that feel more like play than work.
+
+What would you like to know about his projects or approach to development?`;
+
+        const completeMessage = {
+          id: `msg_${Date.now()}`,
           message: userMessage,
-          user_id: user?.id || null 
+          response: aiResponse,
+          timestamp: new Date().toISOString(),
+        };
+
+        // Remove temp message and add complete message
+        setMessages(prev => {
+          const filtered = prev.filter(msg => msg.id !== tempUserMsg.id);
+          return [...filtered, completeMessage];
+        });
+
+        // Save to localStorage for anonymous users
+        saveMessageToLocalStorage(completeMessage);
+      } else {
+        // For authenticated users, call the actual AI function
+        const { data, error } = await supabase.functions.invoke('chat-with-jarvis', {
+          body: { 
+            message: userMessage,
+            user_id: user.id 
+          }
+        });
+
+        if (error) {
+          throw error;
         }
-      });
 
-      if (error) {
-        throw error;
-      }
+        const aiResponse = data?.response || 'Sorry, I encountered an error processing your request.';
+        
+        // Create the complete message
+        const completeMessage = {
+          id: `msg_${Date.now()}`,
+          message: userMessage,
+          response: aiResponse,
+          timestamp: new Date().toISOString(),
+        };
 
-      const aiResponse = data?.response || 'Sorry, I encountered an error processing your request.';
-      
-      // Create the complete message
-      const completeMessage = {
-        id: `msg_${Date.now()}`,
-        message: userMessage,
-        response: aiResponse,
-        timestamp: new Date().toISOString(),
-      };
+        // Remove temp message and add complete message
+        setMessages(prev => {
+          const filtered = prev.filter(msg => msg.id !== tempUserMsg.id);
+          return [...filtered, completeMessage];
+        });
 
-      // Remove temp message and add complete message
-      setMessages(prev => {
-        const filtered = prev.filter(msg => msg.id !== tempUserMsg.id);
-        return [...filtered, completeMessage];
-      });
-
-      // Save to appropriate storage
-      if (user) {
         // Save to database for authenticated users
         await supabase.from('ai_chat_messages').insert({
           user_id: user.id,
           message: userMessage,
           response: aiResponse,
         });
-      } else {
-        // Save to localStorage for anonymous users
-        saveMessageToLocalStorage(completeMessage);
       }
 
     } catch (error) {
@@ -240,43 +267,41 @@ const AIAssistant = () => {
 
   return (
     <>
-      {/* Floating Action Button - Improved mobile visibility */}
+      {/* Floating Action Button - Enhanced visibility */}
       <Button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 w-14 h-14 md:w-16 md:h-16 rounded-full bg-electric-cyan hover:bg-electric-cyan/90 text-dark shadow-lg hover:shadow-xl transition-all duration-300 ${
+        className={`fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-electric-cyan hover:bg-electric-cyan/90 text-dark shadow-lg hover:shadow-xl transition-all duration-300 ${
           isOpen ? 'hidden' : 'flex'
         } items-center justify-center`}
         aria-label="Open AI Assistant"
       >
-        <MessageCircle className="w-6 h-6 md:w-7 md:h-7" />
+        <MessageCircle className="w-7 h-7" />
       </Button>
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-end p-4 md:p-6">
+        <>
           {/* Mobile: Full screen overlay */}
-          <div className="md:hidden fixed inset-0 bg-black/50" onClick={() => setIsOpen(false)} />
-          
-          {/* Chat Card */}
-          <Card className="w-full h-full md:w-96 md:h-[500px] bg-dark/95 border-electric-cyan/30 relative z-10">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b border-gray-800">
-              <CardTitle className="text-electric-cyan font-space-grotesk flex items-center gap-2">
-                <Bot className="w-5 h-5" />
-                AI Assistant
-              </CardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-white h-8 w-8 p-0"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </CardHeader>
-            
-            <CardContent className="flex flex-col h-full p-0">
-              {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+          <div className="fixed inset-0 z-50 md:hidden">
+            <div className="h-full flex flex-col bg-dark">
+              {/* Mobile Header */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-gray-900">
+                <div className="flex items-center gap-2">
+                  <Bot className="w-5 h-5 text-electric-cyan" />
+                  <h2 className="text-electric-cyan font-space-grotesk font-semibold">AI Assistant</h2>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsOpen(false)}
+                  className="text-gray-400 hover:text-white h-8 w-8 p-0"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
+              
+              {/* Mobile Messages Area */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {loadingHistory && (
                   <div className="text-center text-gray-500 text-sm">
                     Loading chat history...
@@ -287,7 +312,7 @@ const AIAssistant = () => {
                   <div className="text-center text-gray-500 text-sm py-8">
                     <Bot className="w-12 h-12 mx-auto mb-4 text-electric-cyan/50" />
                     <p>Hello! I'm your AI assistant.</p>
-                    <p>Ask me anything about this project!</p>
+                    <p>Ask me anything about Sifeddine's work!</p>
                     {!user && (
                       <p className="mt-2 text-xs text-gray-600">
                         Your chat history is saved locally
@@ -316,8 +341,8 @@ const AIAssistant = () => {
                 <div ref={messagesEndRef} />
               </div>
               
-              {/* Input Area */}
-              <div className="border-t border-gray-800 p-4">
+              {/* Mobile Input Area */}
+              <div className="border-t border-gray-800 p-4 bg-gray-900">
                 <div className="flex gap-2">
                   <Input
                     value={newMessage}
@@ -330,15 +355,99 @@ const AIAssistant = () => {
                   <Button
                     onClick={sendMessage}
                     disabled={loading || !newMessage.trim()}
-                    className="bg-electric-cyan hover:bg-electric-cyan/90 text-dark px-3"
+                    className="bg-electric-cyan hover:bg-electric-cyan/90 text-dark px-4"
                   >
                     <Send className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </div>
+
+          {/* Desktop: Floating Card */}
+          <div className="hidden md:block fixed bottom-6 right-6 z-50">
+            <Card className="w-96 h-[500px] glass-effect border-electric-cyan/30 shadow-xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b border-gray-800">
+                <CardTitle className="text-electric-cyan font-space-grotesk flex items-center gap-2">
+                  <Bot className="w-5 h-5" />
+                  AI Assistant
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsOpen(false)}
+                  className="text-gray-400 hover:text-white h-8 w-8 p-0"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </CardHeader>
+              
+              <CardContent className="flex flex-col h-full p-0">
+                {/* Messages Area */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+                  {loadingHistory && (
+                    <div className="text-center text-gray-500 text-sm">
+                      Loading chat history...
+                    </div>
+                  )}
+                  
+                  {messages.length === 0 && !loadingHistory && (
+                    <div className="text-center text-gray-500 text-sm py-8">
+                      <Bot className="w-12 h-12 mx-auto mb-4 text-electric-cyan/50" />
+                      <p>Hello! I'm your AI assistant.</p>
+                      <p>Ask me anything about Sifeddine's work!</p>
+                      {!user && (
+                        <p className="mt-2 text-xs text-gray-600">
+                          Your chat history is saved locally
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  
+                  {renderMessages()}
+                  
+                  {loading && (
+                    <div className="flex gap-3 justify-start">
+                      <div className="w-8 h-8 rounded-full bg-electric-cyan/20 flex items-center justify-center">
+                        <Bot className="w-4 h-4 text-electric-cyan" />
+                      </div>
+                      <div className="bg-gray-800 text-white p-3 rounded-lg">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div ref={messagesEndRef} />
+                </div>
+                
+                {/* Input Area */}
+                <div className="border-t border-gray-800 p-4">
+                  <div className="flex gap-2">
+                    <Input
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Type your message..."
+                      className="flex-1 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-electric-cyan"
+                      disabled={loading}
+                    />
+                    <Button
+                      onClick={sendMessage}
+                      disabled={loading || !newMessage.trim()}
+                      className="bg-electric-cyan hover:bg-electric-cyan/90 text-dark px-3"
+                    >
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </>
       )}
     </>
   );

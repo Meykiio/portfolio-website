@@ -7,7 +7,7 @@ const Lab = () => {
   ];
 
   return (
-    <section className="py-20 px-6 bg-secondary/30">
+    <section id="lab" className="py-20 px-6 bg-secondary/30">
       <div className="max-w-4xl mx-auto">
         <h2 className="font-space text-4xl md:text-5xl font-bold text-center mb-8">
           The Lab
@@ -19,7 +19,7 @@ const Lab = () => {
           </p>
         </div>
         
-        <div className="bg-gradient-glass backdrop-blur-glass border border-white/20 rounded-2xl p-8 md:p-12 shadow-glass">
+        <div className="glass-effect rounded-2xl p-8 md:p-12 shadow-glass">
           <h3 className="font-space text-2xl font-semibold mb-8">
             Right now I'm:
           </h3>

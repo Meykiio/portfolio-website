@@ -8,13 +8,13 @@ const Contact = () => {
   ];
 
   return (
-    <section className="py-20 px-6">
+    <section id="contact" className="py-20 px-6">
       <div className="max-w-4xl mx-auto">
         <h2 className="font-space text-4xl md:text-5xl font-bold text-center mb-12">
           Contact
         </h2>
         
-        <div className="bg-gradient-glass backdrop-blur-glass border border-white/20 rounded-2xl p-8 md:p-12 shadow-glass">
+        <div className="glass-effect rounded-2xl p-8 md:p-12 shadow-glass">
           <div className="text-center mb-12">
             <p className="text-xl md:text-2xl leading-relaxed mb-6">
               Look, I'm not trying to sell anything here.
