@@ -1,4 +1,3 @@
-
 import Hero from "@/components/Hero";
 import { Suspense } from "react";
 import About from "@/components/About";
@@ -7,41 +6,17 @@ import Lab from "@/components/Lab";
 import Mindset from "@/components/Mindset";
 import Contact from "@/components/Contact";
 import FloatingElements from "@/components/FloatingElements";
-import { Button } from "@/components/ui/button";
-import { LogIn, Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
 import { AIAssistant, MetaBalls, Silk } from "@/components/LazyComponents";
 
 const Index = () => {
-  const { user, isAdmin, signOut, loading } = useAuth();
-  const navigate = useNavigate();
+  const { user, isAdmin } = useAuth();
 
-  const handleAuthAction = () => {
-    if (user) {
-      if (isAdmin) {
-        navigate('/admin');
-      } else {
-        signOut();
-      }
-    } else {
-      navigate('/login');
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
     }
-  };
-
-  const getAuthButtonText = () => {
-    if (loading) return 'Loading...';
-    if (user) {
-      return isAdmin ? 'Admin Panel' : 'Sign Out';
-    }
-    return 'Login';
-  };
-
-  const getAuthButtonIcon = () => {
-    if (user && isAdmin) {
-      return <Settings className="w-4 h-4" />;
-    }
-    return <LogIn className="w-4 h-4" />;
   };
 
   return (
@@ -55,27 +30,37 @@ const Index = () => {
           <h1 className="text-xl font-space-grotesk text-electric-cyan font-bold">
             Sifeddine.xyz
           </h1>
-          <div className="flex items-center gap-4">
-            {/* Only show admin link to admin users */}
-            {user && isAdmin && (
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/admin')}
-                className="text-gray-300 hover:text-electric-cyan hover:bg-electric-cyan/10"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Admin
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              onClick={handleAuthAction}
-              disabled={loading}
-              className="border-electric-cyan text-electric-cyan hover:bg-electric-cyan hover:text-dark transition-colors"
+          <div className="flex items-center gap-6">
+            <button
+              onClick={() => scrollToSection('about')}
+              className="text-gray-300 hover:text-electric-cyan transition-colors"
             >
-              {getAuthButtonIcon()}
-              <span className="ml-2">{getAuthButtonText()}</span>
-            </Button>
+              About
+            </button>
+            <button
+              onClick={() => scrollToSection('projects')}
+              className="text-gray-300 hover:text-electric-cyan transition-colors"
+            >
+              Projects
+            </button>
+            <button
+              onClick={() => scrollToSection('lab')}
+              className="text-gray-300 hover:text-electric-cyan transition-colors"
+            >
+              Lab
+            </button>
+            <button
+              onClick={() => scrollToSection('mindset')}
+              className="text-gray-300 hover:text-electric-cyan transition-colors"
+            >
+              Mindset
+            </button>
+            <button
+              onClick={() => scrollToSection('contact')}
+              className="text-gray-300 hover:text-electric-cyan transition-colors"
+            >
+              Contact
+            </button>
           </div>
         </div>
       </nav>
@@ -90,7 +75,7 @@ const Index = () => {
         <Contact />
       </main>
 
-      {/* AI Assistant - Available to all users */}
+      {/* AI Assistant - Available to all users except admins */}
       <Suspense fallback={null}>
         <AIAssistant />
       </Suspense>

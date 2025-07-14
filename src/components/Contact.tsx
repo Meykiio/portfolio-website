@@ -1,10 +1,29 @@
-import { Button } from "@/components/ui/button";
-
 const Contact = () => {
   const contactMethods = [
-    { label: "Email", value: "sifeddine@yourdomain.com", href: "mailto:sifeddine@yourdomain.com" },
-    { label: "Twitter", value: "@sifeddinexyz", href: "https://twitter.com/sifeddinexyz" },
-    { label: "Direct", value: "Drop a DM and say \"yo, I read the site. Let's build.\"", href: "#" }
+    { 
+      label: "Instagram", 
+      value: "@sifeddine.m", 
+      href: "https://www.instagram.com/sifeddine.m/",
+      description: "where I'm vaguely artistic"
+    },
+    { 
+      label: "Facebook", 
+      value: "sifeddinemeb", 
+      href: "https://web.facebook.com/sifeddinemeb",
+      description: "mostly memes and rebellion"
+    },
+    { 
+      label: "LinkedIn", 
+      value: "Sifeddine Mebarki", 
+      href: "https://www.linkedin.com/in/sifeddine-mebarki-a3883a18b",
+      description: "Not my favorite"
+    },
+    { 
+      label: "GitHub", 
+      value: "Meykiio", 
+      href: "https://github.com/Meykiio",
+      description: "it's messy, like life"
+    }
   ];
 
   return (
@@ -17,30 +36,32 @@ const Contact = () => {
         <div className="glass-effect rounded-2xl p-8 md:p-12 shadow-glass">
           <div className="text-center mb-12">
             <p className="text-xl md:text-2xl leading-relaxed mb-6">
-              Look, I'm not trying to sell anything here.
+              Not selling anything. No hustle. No newsletter.
             </p>
             
             <div className="text-lg leading-relaxed space-y-4">
               <p>But if you:</p>
               <ul className="space-y-3 text-left max-w-2xl mx-auto">
-                {[
-                  "have a strange idea that needs someone who thinks sideways",
-                  "want to build something that doesn't need constant attention",
-                  "are tired of things being too serious, too slow, or too broken"
-                ].map((item, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <span className="text-primary font-mono text-sm mt-1">→</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
+                <li className="flex items-start gap-3">
+                  <span className="text-primary font-mono text-sm mt-1">→</span>
+                  <span>Have a weird idea that needs a brain with trust issues</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-primary font-mono text-sm mt-1">→</span>
+                  <span>Want to automate life so you can go outside once in a while</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-primary font-mono text-sm mt-1">→</span>
+                  <span>Or just want to vibe with someone who's allergic to LinkedIn "Thought Leadership"...</span>
+                </li>
               </ul>
               <p className="pt-4">
-                Then yeah, maybe we should talk.
+                Then slide into one of these:
               </p>
             </div>
           </div>
           
-          <div className="space-y-6">
+          <div className="space-y-4">
             {contactMethods.map((method, index) => (
               <div
                 key={index}
@@ -50,20 +71,23 @@ const Contact = () => {
                   <span className="font-mono text-primary font-semibold min-w-[80px]">
                     {method.label}:
                   </span>
-                  <span className="text-lg">
-                    {method.value}
-                  </span>
+                  <div className="flex flex-col">
+                    <span className="text-lg text-white">
+                      {method.value}
+                    </span>
+                    <span className="text-sm text-gray-400 italic">
+                      {method.description}
+                    </span>
+                  </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  asChild
+                <a
+                  href={method.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-primary hover:text-electric-cyan"
                 >
-                  <a href={method.href} target="_blank" rel="noopener noreferrer">
-                    →
-                  </a>
-                </Button>
+                  →
+                </a>
               </div>
             ))}
           </div>

@@ -25,8 +25,8 @@ const AIAssistant = () => {
   const { user, isAdmin } = useAuth();
   const { toast } = useToast();
 
-  // Don't show AI assistant for admin users
-  if (isAdmin) {
+  // Hide AI assistant for admin users - they don't need it when logged in
+  if (user && isAdmin) {
     return null;
   }
 
@@ -54,11 +54,15 @@ const AIAssistant = () => {
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }, 100);
   };
 
   useEffect(() => {
-    scrollToBottom();
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
   }, [messages]);
 
   // Load chat history
@@ -66,8 +70,8 @@ const AIAssistant = () => {
     const loadChatHistory = async () => {
       setLoadingHistory(true);
       try {
-        if (user) {
-          // Load from database for authenticated users
+        if (user && !isAdmin) {
+          // Load from database for authenticated non-admin users
           const { data, error } = await supabase
             .from('ai_chat_messages')
             .select('*')
@@ -91,7 +95,7 @@ const AIAssistant = () => {
             setMessages(formattedMessages);
           }
         } else {
-          // Load from localStorage for anonymous users
+          // Load from localStorage for anonymous users or when not logged in
           const localMessages = loadMessagesFromLocalStorage();
           setMessages(localMessages);
         }
@@ -105,7 +109,7 @@ const AIAssistant = () => {
     if (isOpen) {
       loadChatHistory();
     }
-  }, [isOpen, user, toast]);
+  }, [isOpen, user, isAdmin, toast]);
 
   const sendMessage = async () => {
     if (!newMessage.trim() || loading) return;
@@ -125,67 +129,45 @@ const AIAssistant = () => {
     setMessages(prev => [...prev, tempUserMsg]);
 
     try {
-      // For anonymous users, simulate AI response
-      if (!user) {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        const aiResponse = `Hello! I'm Sifeddine's AI assistant. I'd be happy to help you learn more about his work and projects. However, for the full AI experience with persistent chat history, please consider creating an account. 
+      // Always use simulated AI response for all users (logged in or not)
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const aiResponse = `Hello! I'm Sifeddine's AI assistant. I'd be happy to help you learn more about his work and projects.
 
-For now, I can tell you that Sifeddine is a full-stack developer based in Algiers who specializes in building systems that "run without him." He's passionate about automation, AI, and creating tools that feel more like play than work.
+Sifeddine is a full-stack developer based in Algiers who specializes in building systems that "run without him." He's passionate about automation, AI, and creating tools that feel more like play than work.
+
+His current projects include:
+- **Yuno**: A CAPTCHA system that's actually fun for humans
+- **Receipto**: Turning receipts into live inventory dashboards
+- **Wishdrop**: A wish wall where anonymous givers can help make dreams real
 
 What would you like to know about his projects or approach to development?`;
 
-        const completeMessage = {
-          id: `msg_${Date.now()}`,
-          message: userMessage,
-          response: aiResponse,
-          timestamp: new Date().toISOString(),
-        };
+      const completeMessage = {
+        id: `msg_${Date.now()}`,
+        message: userMessage,
+        response: aiResponse,
+        timestamp: new Date().toISOString(),
+      };
 
-        // Remove temp message and add complete message
-        setMessages(prev => {
-          const filtered = prev.filter(msg => msg.id !== tempUserMsg.id);
-          return [...filtered, completeMessage];
-        });
+      // Remove temp message and add complete message
+      setMessages(prev => {
+        const filtered = prev.filter(msg => msg.id !== tempUserMsg.id);
+        return [...filtered, completeMessage];
+      });
 
-        // Save to localStorage for anonymous users
-        saveMessageToLocalStorage(completeMessage);
-      } else {
-        // For authenticated users, call the actual AI function
-        const { data, error } = await supabase.functions.invoke('chat-with-jarvis', {
-          body: { 
-            message: userMessage,
-            user_id: user.id 
-          }
-        });
-
-        if (error) {
-          throw error;
-        }
-
-        const aiResponse = data?.response || 'Sorry, I encountered an error processing your request.';
-        
-        // Create the complete message
-        const completeMessage = {
-          id: `msg_${Date.now()}`,
-          message: userMessage,
-          response: aiResponse,
-          timestamp: new Date().toISOString(),
-        };
-
-        // Remove temp message and add complete message
-        setMessages(prev => {
-          const filtered = prev.filter(msg => msg.id !== tempUserMsg.id);
-          return [...filtered, completeMessage];
-        });
-
-        // Save to database for authenticated users
+      // Save to appropriate storage
+      if (user && !isAdmin) {
+        // Save to database for authenticated non-admin users
         await supabase.from('ai_chat_messages').insert({
           user_id: user.id,
           message: userMessage,
           response: aiResponse,
         });
+      } else {
+        // Save to localStorage for anonymous users
+        saveMessageToLocalStorage(completeMessage);
       }
 
     } catch (error) {
@@ -267,12 +249,13 @@ What would you like to know about his projects or approach to development?`;
 
   return (
     <>
-      {/* Floating Action Button - Enhanced visibility */}
+      {/* Floating Action Button - Enhanced visibility and positioning */}
       <Button
         onClick={() => setIsOpen(true)}
         className={`fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-electric-cyan hover:bg-electric-cyan/90 text-dark shadow-lg hover:shadow-xl transition-all duration-300 ${
           isOpen ? 'hidden' : 'flex'
         } items-center justify-center`}
+        style={{ zIndex: 9999 }}
         aria-label="Open AI Assistant"
       >
         <MessageCircle className="w-7 h-7" />
@@ -282,10 +265,10 @@ What would you like to know about his projects or approach to development?`;
       {isOpen && (
         <>
           {/* Mobile: Full screen overlay */}
-          <div className="fixed inset-0 z-50 md:hidden">
-            <div className="h-full flex flex-col bg-dark">
+          <div className="fixed inset-0 z-[9998] md:hidden bg-dark">
+            <div className="h-full flex flex-col">
               {/* Mobile Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-gray-900">
+              <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-gray-900 flex-shrink-0">
                 <div className="flex items-center gap-2">
                   <Bot className="w-5 h-5 text-electric-cyan" />
                   <h2 className="text-electric-cyan font-space-grotesk font-semibold">AI Assistant</h2>
@@ -301,7 +284,7 @@ What would you like to know about his projects or approach to development?`;
               </div>
               
               {/* Mobile Messages Area */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
                 {loadingHistory && (
                   <div className="text-center text-gray-500 text-sm">
                     Loading chat history...
@@ -313,11 +296,9 @@ What would you like to know about his projects or approach to development?`;
                     <Bot className="w-12 h-12 mx-auto mb-4 text-electric-cyan/50" />
                     <p>Hello! I'm your AI assistant.</p>
                     <p>Ask me anything about Sifeddine's work!</p>
-                    {!user && (
-                      <p className="mt-2 text-xs text-gray-600">
-                        Your chat history is saved locally
-                      </p>
-                    )}
+                    <p className="mt-2 text-xs text-gray-600">
+                      Your chat history is saved locally
+                    </p>
                   </div>
                 )}
                 
@@ -342,7 +323,7 @@ What would you like to know about his projects or approach to development?`;
               </div>
               
               {/* Mobile Input Area */}
-              <div className="border-t border-gray-800 p-4 bg-gray-900">
+              <div className="border-t border-gray-800 p-4 bg-gray-900 flex-shrink-0">
                 <div className="flex gap-2">
                   <Input
                     value={newMessage}
@@ -365,7 +346,7 @@ What would you like to know about his projects or approach to development?`;
           </div>
 
           {/* Desktop: Floating Card */}
-          <div className="hidden md:block fixed bottom-6 right-6 z-50">
+          <div className="hidden md:block fixed bottom-6 right-6 z-[9998]">
             <Card className="w-96 h-[500px] glass-effect border-electric-cyan/30 shadow-xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b border-gray-800">
                 <CardTitle className="text-electric-cyan font-space-grotesk flex items-center gap-2">
@@ -396,11 +377,9 @@ What would you like to know about his projects or approach to development?`;
                       <Bot className="w-12 h-12 mx-auto mb-4 text-electric-cyan/50" />
                       <p>Hello! I'm your AI assistant.</p>
                       <p>Ask me anything about Sifeddine's work!</p>
-                      {!user && (
-                        <p className="mt-2 text-xs text-gray-600">
-                          Your chat history is saved locally
-                        </p>
-                      )}
+                      <p className="mt-2 text-xs text-gray-600">
+                        Your chat history is saved locally
+                      </p>
                     </div>
                   )}
                   

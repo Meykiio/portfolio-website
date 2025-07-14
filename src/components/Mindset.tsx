@@ -1,11 +1,4 @@
 const Mindset = () => {
-  const principles = [
-    "If I do something twice, I build a system for it.",
-    "If it's boring, I automate it.",
-    "If it's weird, I follow it.",
-    "If it feels like play and it earns money — that's the sweet spot."
-  ];
-
   return (
     <section id="mindset" className="py-20 px-6">
       <div className="max-w-4xl mx-auto">
@@ -15,26 +8,39 @@ const Mindset = () => {
         
         <div className="text-center mb-12">
           <h3 className="font-space text-2xl md:text-3xl font-semibold mb-6">
-            I believe in systems over stress.
+            I don't want to scale myself. I want to <strong className="text-primary">outsource my stress to a system</strong>.
           </h3>
         </div>
         
         <div className="grid gap-6 mb-12">
-          {principles.map((principle, index) => (
-            <div
-              key={index}
-              className="glass-effect rounded-lg p-6 shadow-glass hover:shadow-brutalist transition-all duration-300 hover:translate-x-1"
-            >
-              <p className="font-mono text-lg leading-relaxed">
-                {principle}
-              </p>
-            </div>
-          ))}
+          <div className="glass-effect rounded-lg p-6 shadow-glass hover:shadow-brutalist transition-all duration-300 hover:translate-x-1">
+            <p className="font-mono text-lg leading-relaxed">
+              If something's boring, I make a bot.
+            </p>
+          </div>
+
+          <div className="glass-effect rounded-lg p-6 shadow-glass hover:shadow-brutalist transition-all duration-300 hover:translate-x-1">
+            <p className="font-mono text-lg leading-relaxed">
+              If I do it twice, I automate it before the third time gets cocky.
+            </p>
+          </div>
+
+          <div className="glass-effect rounded-lg p-6 shadow-glass hover:shadow-brutalist transition-all duration-300 hover:translate-x-1">
+            <p className="font-mono text-lg leading-relaxed">
+              If it's weird and slightly unhinged? I'm in.
+            </p>
+          </div>
+
+          <div className="glass-effect rounded-lg p-6 shadow-glass hover:shadow-brutalist transition-all duration-300 hover:translate-x-1">
+            <p className="font-mono text-lg leading-relaxed">
+              If it feels like a game and pays the bills — jackpot.
+            </p>
+          </div>
         </div>
         
         <div className="bg-foreground text-background rounded-2xl p-8 md:p-12 shadow-brutalist">
           <blockquote className="font-mono text-xl md:text-2xl leading-relaxed text-center">
-            "I'm not trying to scale myself. I'm trying to build stuff that lives without me."
+            "I don't work hard. I work once, then let the system grind while I go build something else I'll probably abandon later."
           </blockquote>
           <div className="text-center mt-6">
             <div className="w-16 h-0.5 bg-primary mx-auto"></div>
