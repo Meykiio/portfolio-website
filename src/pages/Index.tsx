@@ -31,6 +31,14 @@ const Index = () => {
             Sifeddine.xyz
           </h1>
           <div className="flex items-center gap-6">
+            {user && isAdmin && (
+              <a
+                href="/admin"
+                className="text-gray-300 hover:text-electric-cyan transition-colors"
+              >
+                Admin
+              </a>
+            )}
             <button
               onClick={() => scrollToSection('about')}
               className="text-gray-300 hover:text-electric-cyan transition-colors"

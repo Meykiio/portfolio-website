@@ -22,13 +22,8 @@ const AIAssistant = () => {
   const [loading, setLoading] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
-
-  // Hide AI assistant for admin users - they don't need it when logged in
-  if (user && isAdmin) {
-    return null;
-  }
 
   // Anonymous session management
   const getAnonymousSessionId = () => {
@@ -70,8 +65,8 @@ const AIAssistant = () => {
     const loadChatHistory = async () => {
       setLoadingHistory(true);
       try {
-        if (user && !isAdmin) {
-          // Load from database for authenticated non-admin users
+        if (user) {
+          // Load from database for authenticated users
           const { data, error } = await supabase
             .from('ai_chat_messages')
             .select('*')
@@ -80,11 +75,9 @@ const AIAssistant = () => {
 
           if (error) {
             console.error('Error loading chat history:', error);
-            toast({
-              title: "Warning",
-              description: "Could not load chat history from server",
-              variant: "destructive",
-            });
+            // Fallback to localStorage if database fails
+            const localMessages = loadMessagesFromLocalStorage();
+            setMessages(localMessages);
           } else if (data) {
             const formattedMessages = data.map(msg => ({
               id: msg.id,
@@ -95,12 +88,15 @@ const AIAssistant = () => {
             setMessages(formattedMessages);
           }
         } else {
-          // Load from localStorage for anonymous users or when not logged in
+          // Load from localStorage for anonymous users
           const localMessages = loadMessagesFromLocalStorage();
           setMessages(localMessages);
         }
       } catch (error) {
         console.error('Error loading chat history:', error);
+        // Fallback to localStorage
+        const localMessages = loadMessagesFromLocalStorage();
+        setMessages(localMessages);
       } finally {
         setLoadingHistory(false);
       }
@@ -109,7 +105,7 @@ const AIAssistant = () => {
     if (isOpen) {
       loadChatHistory();
     }
-  }, [isOpen, user, isAdmin, toast]);
+  }, [isOpen, user, toast]);
 
   const sendMessage = async () => {
     if (!newMessage.trim() || loading) return;
@@ -129,8 +125,7 @@ const AIAssistant = () => {
     setMessages(prev => [...prev, tempUserMsg]);
 
     try {
-      // Always use simulated AI response for all users (logged in or not)
-      // Simulate API delay
+      // Simulate API delay for realistic experience
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       const aiResponse = `Hello! I'm Sifeddine's AI assistant. I'd be happy to help you learn more about his work and projects.
@@ -158,13 +153,18 @@ What would you like to know about his projects or approach to development?`;
       });
 
       // Save to appropriate storage
-      if (user && !isAdmin) {
-        // Save to database for authenticated non-admin users
-        await supabase.from('ai_chat_messages').insert({
-          user_id: user.id,
-          message: userMessage,
-          response: aiResponse,
-        });
+      if (user) {
+        // Try to save to database for authenticated users
+        try {
+          await supabase.from('ai_chat_messages').insert({
+            user_id: user.id,
+            message: userMessage,
+            response: aiResponse,
+          });
+        } catch (dbError) {
+          console.error('Database save failed, using localStorage:', dbError);
+          saveMessageToLocalStorage(completeMessage);
+        }
       } else {
         // Save to localStorage for anonymous users
         saveMessageToLocalStorage(completeMessage);
@@ -252,7 +252,7 @@ What would you like to know about his projects or approach to development?`;
       {/* Floating Action Button - Enhanced visibility and positioning */}
       <Button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-electric-cyan hover:bg-electric-cyan/90 text-dark shadow-lg hover:shadow-xl transition-all duration-300 ${
+        className={`fixed bottom-6 right-6 w-16 h-16 rounded-full bg-electric-cyan hover:bg-electric-cyan/90 text-dark shadow-lg hover:shadow-xl transition-all duration-300 ${
           isOpen ? 'hidden' : 'flex'
         } items-center justify-center`}
         style={{ zIndex: 9999 }}
@@ -265,7 +265,7 @@ What would you like to know about his projects or approach to development?`;
       {isOpen && (
         <>
           {/* Mobile: Full screen overlay */}
-          <div className="fixed inset-0 z-[9998] md:hidden bg-dark">
+          <div className="fixed inset-0 md:hidden bg-dark" style={{ zIndex: 9998 }}>
             <div className="h-full flex flex-col">
               {/* Mobile Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-gray-900 flex-shrink-0">
@@ -346,7 +346,7 @@ What would you like to know about his projects or approach to development?`;
           </div>
 
           {/* Desktop: Floating Card */}
-          <div className="hidden md:block fixed bottom-6 right-6 z-[9998]">
+          <div className="hidden md:block fixed bottom-6 right-6" style={{ zIndex: 9998 }}>
             <Card className="w-96 h-[500px] glass-effect border-electric-cyan/30 shadow-xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b border-gray-800">
                 <CardTitle className="text-electric-cyan font-space-grotesk flex items-center gap-2">

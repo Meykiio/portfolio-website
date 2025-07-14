@@ -32,7 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('role')
+        .select('*')
         .eq('user_id', userId)
         .single();
 
@@ -41,7 +41,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAdmin(false);
         return false;
       } else {
-        const adminStatus = data?.role === 'admin';
+        // Check if user exists in profiles table and has admin role
+        const adminStatus = data && data.role === 'admin';
+        console.log('Admin status check:', { data, adminStatus });
         setIsAdmin(adminStatus);
         return adminStatus;
       }
